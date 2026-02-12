@@ -93,6 +93,25 @@
     .tools-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
     .tool-tag { padding: 0.3rem 0.8rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; font-size: 0.85rem; }
 
+    /* Calculator */
+    .calculator { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-top: 2rem; }
+    .calc-title { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .calc-desc { color: var(--text-dim); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .calc-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end; }
+    .calc-field label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.3rem; text-transform: uppercase; font-weight: 600; }
+    .calc-field select, .calc-field input { width: 100%; padding: 0.7rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; }
+    .calc-field select:focus, .calc-field input:focus { outline: none; border-color: var(--accent); }
+    .calc-btn { padding: 0.7rem 1.5rem; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .calc-btn:hover { background: #fbbf24; }
+    .calc-result { margin-top: 1.5rem; }
+    .calc-result:empty { display: none; }
+    .calc-result table { margin-bottom: 1rem; }
+    .calc-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .calc-summary .box { padding: 1rem; background: var(--surface-2); border-radius: 8px; text-align: center; }
+    .calc-summary .box .val { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+    .calc-summary .box .label { font-size: 0.8rem; color: var(--text-dim); }
+    .calc-cost { font-size: 1.1rem; font-weight: 600; color: var(--green); text-align: center; margin-top: 1rem; }
+
     footer { text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.85rem; border-top: 1px solid var(--border); }
     footer a { color: var(--accent); text-decoration: none; }
 
@@ -113,6 +132,34 @@
   <div class="container">
     <div class="filters" id="filters"></div>
     <div class="ramp-grid" id="rampGrid"></div>
+  </div>
+
+  <!-- Custom Dimension Calculator -->
+  <div class="container" id="calculatorSection">
+    <div class="calculator">
+      <h2 class="calc-title">📐 Custom Dimension Calculator</h2>
+      <p class="calc-desc">Enter your own dimensions and get an auto-generated materials list scaled to your build.</p>
+      <div class="calc-form">
+        <div class="calc-field">
+          <label for="calcType">Ramp Type</label>
+          <select id="calcType"></select>
+        </div>
+        <div class="calc-field">
+          <label for="calcHeight">Height (inches)</label>
+          <input type="number" id="calcHeight" min="6" max="144" placeholder="e.g. 36">
+        </div>
+        <div class="calc-field">
+          <label for="calcWidth">Width (inches)</label>
+          <input type="number" id="calcWidth" min="12" max="240" placeholder="e.g. 96">
+        </div>
+        <div class="calc-field">
+          <label for="calcLength">Length (inches)</label>
+          <input type="number" id="calcLength" min="12" max="360" placeholder="e.g. 192">
+        </div>
+        <button class="calc-btn" id="calcBtn">Generate Materials List</button>
+      </div>
+      <div id="calcResult" class="calc-result"></div>
+    </div>
   </div>
 
   <div class="modal-overlay" id="modal">
@@ -138,6 +185,7 @@
       ramps = await res.json();
       renderFilters();
       renderGrid();
+      initCalculator();
     }
 
     function renderFilters() {
@@ -299,6 +347,92 @@
         document.body.style.overflow = '';
       }
     });
+
+    // Custom Dimension Calculator
+    function initCalculator() {
+      const sel = document.getElementById('calcType');
+      const types = [...new Set(ramps.map(r => r.type))];
+      const labels = { 'mini-ramp': 'Mini Ramp', 'quarter-pipe': 'Quarter Pipe', 'kicker': 'Kicker', 'box': 'Grind Box', 'rail': 'Rail' };
+      sel.innerHTML = types.map(t => `<option value="${t}">${labels[t] || t}</option>`).join('');
+
+      // Pre-fill with reference dims when type changes
+      sel.addEventListener('change', prefillDims);
+      prefillDims();
+
+      document.getElementById('calcBtn').addEventListener('click', calculate);
+    }
+
+    function prefillDims() {
+      const type = document.getElementById('calcType').value;
+      const ref = ramps.find(r => r.type === type);
+      if (ref) {
+        document.getElementById('calcHeight').placeholder = `e.g. ${ref.height}`;
+        document.getElementById('calcWidth').placeholder = `e.g. ${ref.width}`;
+        document.getElementById('calcLength').placeholder = `e.g. ${ref.length}`;
+      }
+    }
+
+    function calculate() {
+      const type = document.getElementById('calcType').value;
+      const h = parseFloat(document.getElementById('calcHeight').value);
+      const w = parseFloat(document.getElementById('calcWidth').value);
+      const l = parseFloat(document.getElementById('calcLength').value);
+
+      if (!h || !w || !l || h <= 0 || w <= 0 || l <= 0) {
+        document.getElementById('calcResult').innerHTML = '<p style="color:var(--red)">Please enter valid dimensions for all fields.</p>';
+        return;
+      }
+
+      // Find the closest reference ramp of this type
+      const refs = ramps.filter(r => r.type === type);
+      if (!refs.length) return;
+
+      // Pick the reference ramp closest in volume
+      const customVol = h * w * l;
+      let best = refs[0];
+      let bestDiff = Math.abs((best.height * best.width * best.length) - customVol);
+      for (const r of refs) {
+        const d = Math.abs((r.height * r.width * r.length) - customVol);
+        if (d < bestDiff) { best = r; bestDiff = d; }
+      }
+
+      const refVol = best.height * best.width * best.length;
+      const scale = customVol / refVol;
+
+      // Scale materials
+      const scaled = best.materials.filter(m => !m.optional).map(m => {
+        let qty = m.qty * scale;
+        // Round up — you can't buy half a sheet of plywood
+        qty = Math.ceil(qty);
+        if (qty < 1) qty = 1;
+        return { item: m.item, qty, use: m.use };
+      });
+
+      // Optional materials
+      const optional = best.materials.filter(m => m.optional);
+
+      // Estimate cost by scaling
+      const costScale = scale;
+      const costMin = Math.round(best.estimatedCost.min * costScale);
+      const costMax = Math.round(best.estimatedCost.max * costScale);
+
+      // Render result
+      const rows = scaled.map(m => `<tr><td>${m.item}</td><td class="qty">${m.qty}</td><td style="color:var(--text-dim)">${m.use}</td></tr>`).join('');
+      const optRows = optional.map(m => `<tr style="opacity:0.6"><td>${m.item} ⭐</td><td class="qty">–</td><td style="color:var(--text-dim)">${m.use}</td></tr>`).join('');
+
+      document.getElementById('calcResult').innerHTML = `
+        <div class="calc-summary">
+          <div class="box"><div class="val">${h}"</div><div class="label">Height</div></div>
+          <div class="box"><div class="val">${w}"</div><div class="label">Width</div></div>
+          <div class="box"><div class="val">${l}"</div><div class="label">Length</div></div>
+          <div class="box"><div class="val">${scale.toFixed(2)}×</div><div class="label">Scale Factor</div></div>
+        </div>
+        <h3 class="section-title">📦 Scaled Materials List</h3>
+        <p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:1rem">Based on <strong>${best.name}</strong> scaled ${scale < 1 ? 'down' : 'up'} by ${scale.toFixed(2)}× — all quantities rounded up.</p>
+        <table><thead><tr><th>Material</th><th style="text-align:center">Qty</th><th>Use</th></tr></thead><tbody>${rows}${optRows}</tbody></table>
+        <div class="calc-cost">💰 Estimated Cost: $${costMin} – $${costMax}</div>
+      `;
+    }
 
     init();
   </script>
