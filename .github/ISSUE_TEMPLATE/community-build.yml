@@ -1,0 +1,78 @@
+name: Community Build Submission
+description: Submit photos of your completed ramp build to the gallery
+title: "[Gallery] "
+labels: ["community-build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📸 Submit Your Build!
+        Share your completed ramp with the RampBlueprint community.
+  - type: input
+    id: title
+    attributes:
+      label: Build Title
+      placeholder: "e.g., Backyard 3ft Mini Ramp"
+    validations:
+      required: true
+  - type: dropdown
+    id: ramp-type
+    attributes:
+      label: Ramp Type
+      options:
+        - Mini Ramp
+        - Quarter Pipe
+        - Kicker
+        - Grind Box
+        - Rail
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: builder
+    attributes:
+      label: Builder Name / Username
+      placeholder: "Your name or handle"
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      placeholder: "e.g., Portland, OR"
+  - type: textarea
+    id: photos
+    attributes:
+      label: Photos
+      description: Drag and drop or paste your build photos here (at least 1 required)
+      placeholder: "Drag images here..."
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Tell us about your build — modifications, tips, how it rides
+      placeholder: "What was your experience building this?"
+    validations:
+      required: true
+  - type: input
+    id: cost
+    attributes:
+      label: Total Cost
+      placeholder: "e.g., $350"
+  - type: input
+    id: time
+    attributes:
+      label: Build Time
+      placeholder: "e.g., 2 weekends"
+  - type: dropdown
+    id: rating
+    attributes:
+      label: How would you rate the blueprint?
+      options:
+        - ⭐⭐⭐⭐⭐ (5/5)
+        - ⭐⭐⭐⭐ (4/5)
+        - ⭐⭐⭐ (3/5)
+        - ⭐⭐ (2/5)
+        - ⭐ (1/5)

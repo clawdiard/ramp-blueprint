@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Builds Gallery — RampBlueprint</title>
+  <meta name="description" content="Photo gallery of completed DIY skateboard ramp builds from the RampBlueprint community. Submit your own build!">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔨</text></svg>">
+  <style>
+    :root {
+      --bg: #0a0a0a; --surface: #151515; --surface-2: #1e1e1e;
+      --border: #2a2a2a; --text: #e8e8e8; --text-dim: #888;
+      --accent: #f59e0b; --accent-dim: #b45309;
+      --green: #22c55e; --blue: #3b82f6; --red: #ef4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    header { text-align: center; padding: 2rem 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 2rem; font-weight: 800; }
+    header h1 span { color: var(--accent); }
+    header p { color: var(--text-dim); margin-top: 0.3rem; }
+    .back-link { display: inline-block; margin-top: 0.8rem; color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+
+    /* Filters */
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; justify-content: center; }
+    .filter-btn { padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text-dim); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--surface-2); }
+
+    /* Gallery grid */
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .build-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.2s; }
+    .build-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .build-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+    .build-info { padding: 1.25rem; }
+    .build-info h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+    .build-meta { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+    .build-meta .type-tag { display: inline-block; padding: 0.1rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-right: 0.5rem; }
+    .type-tag.mini-ramp { background: #3b82f620; color: var(--blue); }
+    .type-tag.quarter-pipe { background: #22c55e20; color: var(--green); }
+    .type-tag.kicker { background: #f59e0b20; color: var(--accent); }
+    .type-tag.box { background: #ef444420; color: var(--red); }
+    .type-tag.rail { background: #a855f720; color: #a855f7; }
+    .build-desc { font-size: 0.9rem; color: var(--text-dim); }
+    .build-stats { display: flex; gap: 1rem; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-dim); }
+
+    /* Submit CTA */
+    .submit-section { text-align: center; margin: 3rem 0 2rem; padding: 2.5rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+    .submit-section h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .submit-section p { color: var(--text-dim); max-width: 500px; margin: 0 auto 1.5rem; }
+    .submit-btn { display: inline-block; padding: 0.75rem 2rem; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: all 0.2s; }
+    .submit-btn:hover { background: var(--accent-dim); }
+
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; cursor: pointer; }
+    .lightbox.active { display: flex; }
+    .lightbox img, .lightbox .placeholder-emoji { max-width: 90vw; max-height: 80vh; border-radius: 12px; }
+    .lightbox .placeholder-emoji { font-size: 8rem; }
+    .lightbox-caption { color: var(--text); margin-top: 1rem; font-size: 1.1rem; font-weight: 600; text-align: center; }
+    .lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; color: var(--text-dim); font-size: 2rem; cursor: pointer; background: none; border: none; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-dim); font-size: 1.1rem; }
+
+    footer { text-align: center; padding: 2rem 1rem; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.85rem; margin-top: 2rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .gallery { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📸 Community <span>Builds</span> Gallery</h1>
+    <p>Real ramps built by real skaters using RampBlueprint plans</p>
+    <a href="index.html" class="back-link">← Back to Blueprints</a>
+  </header>
+
+  <div class="container">
+    <div class="filters" id="filters"></div>
+    <div class="gallery" id="gallery"></div>
+    <div class="empty-state" id="empty" style="display:none">No builds found for this filter. Be the first! 🛹</div>
+
+    <div class="submit-section">
+      <h2>🛹 Built a Ramp? Show It Off!</h2>
+      <p>Submit photos of your completed build to be featured in the gallery. Just open a GitHub issue with your photos and details.</p>
+      <a href="https://github.com/clawdiard/ramp-blueprint/issues/new?template=community-build.yml&title=%5BGallery%5D+My+Build" class="submit-btn" target="_blank" rel="noopener">Submit Your Build</a>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lbClose">&times;</button>
+    <div id="lbContent"></div>
+    <div class="lightbox-caption" id="lbCaption"></div>
+  </div>
+
+  <footer>
+    <p>Built by <a href="https://github.com/clawdiard">Clawdia</a> · <a href="index.html">RampBlueprint</a> · <a href="https://github.com/clawdiard/ramp-blueprint/issues/new?template=community-build.yml&title=%5BGallery%5D+My+Build">Submit a build</a></p>
+  </footer>
+
+  <script>
+    const builds = [
+      {
+        id: 1, title: "Backyard 3ft Mini Ramp", builder: "SK8R_Mike", type: "mini-ramp",
+        emoji: "🛹", location: "Portland, OR", date: "2026-01",
+        desc: "Built using the 3ft mini ramp plan. Added extra bracing for the Pacific NW rain. Masonite surface holds up great!",
+        cost: "$380", time: "2 weekends", rating: 5
+      },
+      {
+        id: 2, title: "Garage Quarter Pipe", builder: "wheels_n_deals", type: "quarter-pipe",
+        emoji: "🏠", location: "Austin, TX", date: "2026-01",
+        desc: "Fits perfectly against the garage wall. 3ft quarter pipe — kids love it. Used leftover lumber from a deck project.",
+        cost: "$120", time: "1 day", rating: 5
+      },
+      {
+        id: 3, title: "Driveway Kicker Ramp", builder: "OllieQueen", type: "kicker",
+        emoji: "🚀", location: "Brooklyn, NY", date: "2026-02",
+        desc: "Compact kicker for the driveway. Great pop for ollies and kickflips. Portable enough to move to the park.",
+        cost: "$45", time: "3 hours", rating: 4
+      },
+      {
+        id: 4, title: "Park-Style Grind Box", builder: "GrindKing_303", type: "box",
+        emoji: "⬛", location: "Denver, CO", date: "2026-02",
+        desc: "Steel-edged grind box, super sturdy. The coping angle from the blueprint was spot on. Waxed and ready to shred.",
+        cost: "$95", time: "5 hours", rating: 5
+      },
+      {
+        id: 5, title: "Backyard Flat Rail", builder: "rail_rider", type: "rail",
+        emoji: "🔩", location: "San Diego, CA", date: "2026-01",
+        desc: "Welded round rail, 6ft long. Added adjustable height legs so beginners can start low. Powder coated for durability.",
+        cost: "$70", time: "4 hours", rating: 5
+      },
+      {
+        id: 6, title: "4ft Mini Ramp Beast", builder: "VertDog", type: "mini-ramp",
+        emoji: "🏗️", location: "Nashville, TN", date: "2026-02",
+        desc: "Full 4ft mini with extended deck. This thing is massive — took the whole crew to build but totally worth it. Steel coping grinds like butter.",
+        cost: "$650", time: "3 weekends", rating: 5
+      },
+      {
+        id: 7, title: "Rooftop Quarter", builder: "SkySk8", type: "quarter-pipe",
+        emoji: "🌆", location: "Chicago, IL", date: "2025-12",
+        desc: "Quarter pipe on my rooftop terrace. Reinforced the base for the concrete surface. Neighbors think I'm crazy but the sunset sessions are unreal.",
+        cost: "$200", time: "2 days", rating: 4
+      },
+      {
+        id: 8, title: "Competition Kicker", builder: "CompSk8r", type: "kicker",
+        emoji: "🏆", location: "Phoenix, AZ", date: "2026-01",
+        desc: "Built for our local comp. Steeper angle than the standard plan — gets insane pop. Plywood lasted through 50+ skaters no problem.",
+        cost: "$60", time: "4 hours", rating: 5
+      }
+    ];
+
+    const types = ['all', ...new Set(builds.map(b => b.type))];
+    const filtersEl = document.getElementById('filters');
+    const galleryEl = document.getElementById('gallery');
+    const emptyEl = document.getElementById('empty');
+    let activeFilter = 'all';
+
+    function renderFilters() {
+      filtersEl.innerHTML = types.map(t =>
+        `<button class="filter-btn ${t === activeFilter ? 'active' : ''}" data-type="${t}">${t === 'all' ? '🔨 All Builds' : t.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</button>`
+      ).join('');
+      filtersEl.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => { activeFilter = btn.dataset.type; renderFilters(); renderGallery(); });
+      });
+    }
+
+    function renderGallery() {
+      const filtered = activeFilter === 'all' ? builds : builds.filter(b => b.type === activeFilter);
+      if (!filtered.length) { galleryEl.innerHTML = ''; emptyEl.style.display = 'block'; return; }
+      emptyEl.style.display = 'none';
+      galleryEl.innerHTML = filtered.map(b => `
+        <div class="build-card" data-id="${b.id}">
+          <div class="build-img" style="display:flex;align-items:center;justify-content:center;font-size:4rem;background:var(--surface-2)">${b.emoji}</div>
+          <div class="build-info">
+            <h3>${b.title}</h3>
+            <div class="build-meta">
+              <span class="type-tag ${b.type}">${b.type.replace(/-/g,' ')}</span>
+              by <strong>${b.builder}</strong> · ${b.location}
+            </div>
+            <p class="build-desc">${b.desc}</p>
+          </div>
+          <div class="build-stats">
+            <span>💰 ${b.cost}</span>
+            <span>⏱ ${b.time}</span>
+            <span>${'⭐'.repeat(b.rating)}</span>
+          </div>
+        </div>
+      `).join('');
+
+      galleryEl.querySelectorAll('.build-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const b = builds.find(x => x.id === +card.dataset.id);
+          if (!b) return;
+          document.getElementById('lbContent').innerHTML = `<div class="placeholder-emoji">${b.emoji}</div>`;
+          document.getElementById('lbCaption').textContent = `${b.title} — by ${b.builder}, ${b.location}`;
+          document.getElementById('lightbox').classList.add('active');
+          document.body.style.overflow = 'hidden';
+        });
+      });
+    }
+
+    document.getElementById('lbClose').addEventListener('click', e => { e.stopPropagation(); closeLightbox(); });
+    document.getElementById('lightbox').addEventListener('click', closeLightbox);
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow = ''; }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    renderFilters();
+    renderGallery();
+  </script>
+</body>
+</html>
