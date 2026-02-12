@@ -1,0 +1,197 @@
+[
+  {
+    "id": "mini-ramp-3ft",
+    "name": "3ft Mini Ramp",
+    "type": "mini-ramp",
+    "height": 36,
+    "width": 96,
+    "length": 192,
+    "transitionRadius": 84,
+    "flatBottom": 96,
+    "description": "Classic backyard mini ramp. Perfect for learning transitions, grinds, and airs. The most popular DIY ramp size.",
+    "difficulty": "Intermediate",
+    "materials": [
+      { "item": "2×4 Lumber (8ft)", "qty": 28, "use": "Framing & supports" },
+      { "item": "2×6 Lumber (8ft)", "qty": 4, "use": "Top coping supports" },
+      { "item": "3/4\" Plywood (4×8 sheet)", "qty": 8, "use": "Transition templates & surface layer" },
+      { "item": "1/4\" Masonite (4×8 sheet)", "qty": 6, "use": "Smooth riding surface" },
+      { "item": "2\" Steel Pipe (8ft)", "qty": 2, "use": "Coping" },
+      { "item": "3\" Deck Screws (1lb box)", "qty": 4, "use": "Framing" },
+      { "item": "1-5/8\" Deck Screws (1lb box)", "qty": 3, "use": "Surface attachment" },
+      { "item": "Pipe Straps (2\")", "qty": 12, "use": "Coping attachment" },
+      { "item": "Skatelite (4×8 sheet)", "qty": 0, "use": "Optional pro surface (replaces masonite)", "optional": true }
+    ],
+    "tools": ["Circular Saw", "Drill/Driver", "Jigsaw", "Tape Measure", "Speed Square", "Pencil", "String Line", "Level"],
+    "estimatedCost": { "min": 350, "max": 550 },
+    "buildTime": "2-3 days (2 people)",
+    "steps": [
+      "Cut transition templates from plywood using the radius arc",
+      "Frame the two transition walls with 2×4 studs every 8 inches",
+      "Build flat bottom frame connecting the two transitions",
+      "Add cross-bracing for stability",
+      "Attach plywood surface layer to transitions and flat",
+      "Install masonite smooth surface on top",
+      "Mount steel pipe coping with pipe straps",
+      "Sand all edges and check for screw pops"
+    ]
+  },
+  {
+    "id": "mini-ramp-4ft",
+    "name": "4ft Mini Ramp",
+    "type": "mini-ramp",
+    "height": 48,
+    "width": 96,
+    "length": 216,
+    "transitionRadius": 96,
+    "flatBottom": 96,
+    "description": "Step up from the 3-footer. More speed, bigger airs, serious fun. Standard competition mini ramp height.",
+    "difficulty": "Advanced",
+    "materials": [
+      { "item": "2×4 Lumber (8ft)", "qty": 36, "use": "Framing & supports" },
+      { "item": "2×6 Lumber (8ft)", "qty": 6, "use": "Top coping supports & platform" },
+      { "item": "3/4\" Plywood (4×8 sheet)", "qty": 11, "use": "Transition templates & surface" },
+      { "item": "1/4\" Masonite (4×8 sheet)", "qty": 8, "use": "Smooth riding surface" },
+      { "item": "2\" Steel Pipe (8ft)", "qty": 2, "use": "Coping" },
+      { "item": "3\" Deck Screws (1lb box)", "qty": 5, "use": "Framing" },
+      { "item": "1-5/8\" Deck Screws (1lb box)", "qty": 4, "use": "Surface attachment" },
+      { "item": "Pipe Straps (2\")", "qty": 12, "use": "Coping attachment" }
+    ],
+    "tools": ["Circular Saw", "Drill/Driver", "Jigsaw", "Tape Measure", "Speed Square", "Pencil", "String Line", "Level"],
+    "estimatedCost": { "min": 500, "max": 800 },
+    "buildTime": "3-4 days (2 people)",
+    "steps": [
+      "Cut transition templates using 96\" radius arc",
+      "Frame transition walls with 2×4 studs every 8 inches",
+      "Build flat bottom and platform frames",
+      "Connect transitions to flat bottom",
+      "Add diagonal bracing on back of transitions",
+      "Layer plywood surface over frame",
+      "Install masonite riding surface",
+      "Mount coping and build deck platforms",
+      "Final inspection: check all screws, level coping"
+    ]
+  },
+  {
+    "id": "quarter-pipe-3ft",
+    "name": "3ft Quarter Pipe",
+    "type": "quarter-pipe",
+    "height": 36,
+    "width": 96,
+    "length": 84,
+    "transitionRadius": 84,
+    "flatBottom": 0,
+    "description": "Single transition wall — great for practicing airs, lip tricks, and stalls. Takes up half the space of a mini ramp.",
+    "difficulty": "Beginner-Intermediate",
+    "materials": [
+      { "item": "2×4 Lumber (8ft)", "qty": 14, "use": "Framing" },
+      { "item": "2×6 Lumber (8ft)", "qty": 2, "use": "Coping support & platform" },
+      { "item": "3/4\" Plywood (4×8 sheet)", "qty": 4, "use": "Templates & surface" },
+      { "item": "1/4\" Masonite (4×8 sheet)", "qty": 3, "use": "Riding surface" },
+      { "item": "2\" Steel Pipe (8ft)", "qty": 1, "use": "Coping" },
+      { "item": "3\" Deck Screws (1lb box)", "qty": 2, "use": "Framing" },
+      { "item": "1-5/8\" Deck Screws (1lb box)", "qty": 2, "use": "Surface" },
+      { "item": "Pipe Straps (2\")", "qty": 6, "use": "Coping attachment" }
+    ],
+    "tools": ["Circular Saw", "Drill/Driver", "Jigsaw", "Tape Measure", "Speed Square", "Level"],
+    "estimatedCost": { "min": 175, "max": 300 },
+    "buildTime": "1 day (2 people)",
+    "steps": [
+      "Cut two transition templates from plywood",
+      "Frame with 2×4 studs every 8 inches between templates",
+      "Add back support bracing",
+      "Attach plywood surface layer",
+      "Install masonite smooth surface",
+      "Mount coping pipe",
+      "Build small deck platform on top"
+    ]
+  },
+  {
+    "id": "kicker-ramp",
+    "name": "Kicker Ramp (Launch Ramp)",
+    "type": "kicker",
+    "height": 18,
+    "width": 48,
+    "length": 48,
+    "transitionRadius": 60,
+    "flatBottom": 0,
+    "description": "Portable launch ramp for gaps, ollies, and getting air anywhere. Light enough for one person to carry.",
+    "difficulty": "Beginner",
+    "materials": [
+      { "item": "2×4 Lumber (8ft)", "qty": 4, "use": "Frame" },
+      { "item": "3/4\" Plywood (4×8 sheet)", "qty": 2, "use": "Side templates & surface" },
+      { "item": "1/4\" Masonite (4×8 sheet)", "qty": 1, "use": "Riding surface" },
+      { "item": "3\" Deck Screws (1lb box)", "qty": 1, "use": "Assembly" }
+    ],
+    "tools": ["Circular Saw", "Drill/Driver", "Jigsaw", "Tape Measure"],
+    "estimatedCost": { "min": 50, "max": 100 },
+    "buildTime": "2-3 hours",
+    "steps": [
+      "Cut two side templates with transition curve",
+      "Cut 2×4 cross supports to width",
+      "Screw cross supports between side templates",
+      "Attach plywood surface",
+      "Add masonite top layer",
+      "Sand edges smooth"
+    ]
+  },
+  {
+    "id": "grind-box",
+    "name": "Grind Box",
+    "type": "box",
+    "height": 12,
+    "width": 24,
+    "length": 72,
+    "transitionRadius": 0,
+    "flatBottom": 0,
+    "description": "Essential street obstacle. Square steel edge for grinding and sliding. Sturdy enough to take a beating.",
+    "difficulty": "Beginner",
+    "materials": [
+      { "item": "2×4 Lumber (8ft)", "qty": 6, "use": "Frame" },
+      { "item": "3/4\" Plywood (4×8 sheet)", "qty": 2, "use": "Surface & sides" },
+      { "item": "L-Angle Steel (1.5\" × 6ft)", "qty": 2, "use": "Grind edge (coping)" },
+      { "item": "3\" Deck Screws (1lb box)", "qty": 2, "use": "Framing" },
+      { "item": "1/4\" Bolts + Nuts (20 pack)", "qty": 1, "use": "Steel edge attachment" }
+    ],
+    "tools": ["Circular Saw", "Drill/Driver", "Tape Measure", "Wrench Set"],
+    "estimatedCost": { "min": 75, "max": 150 },
+    "buildTime": "3-4 hours",
+    "steps": [
+      "Build rectangular box frame from 2×4s",
+      "Cut plywood for top surface and sides",
+      "Attach plywood to frame",
+      "Drill holes for steel angle along edges",
+      "Bolt steel L-angle coping to edges",
+      "Wax the coping for smooth grinds"
+    ]
+  },
+  {
+    "id": "flat-bar",
+    "name": "Flat Bar Rail",
+    "type": "rail",
+    "height": 12,
+    "width": 8,
+    "length": 72,
+    "transitionRadius": 0,
+    "flatBottom": 0,
+    "description": "Round rail for boardslides and grinds. Adjustable height with leg design. Easy to transport.",
+    "difficulty": "Beginner",
+    "materials": [
+      { "item": "2\" Steel Pipe (6ft)", "qty": 1, "use": "Rail" },
+      { "item": "2\" Steel Pipe (1ft)", "qty": 4, "use": "Legs" },
+      { "item": "Steel Flange (2\")", "qty": 6, "use": "Joints" },
+      { "item": "3/4\" Plywood (2×2 piece)", "qty": 2, "use": "Base plates" },
+      { "item": "3\" Lag Bolts", "qty": 8, "use": "Base attachment" }
+    ],
+    "tools": ["Pipe Wrench", "Drill/Driver", "Level"],
+    "estimatedCost": { "min": 60, "max": 120 },
+    "buildTime": "1-2 hours",
+    "steps": [
+      "Thread flanges onto leg pipes",
+      "Attach legs to rail pipe via T-flanges",
+      "Cut plywood base plates",
+      "Bolt base flanges to plywood",
+      "Level and adjust",
+      "Wax the rail"
+    ]
+  }
+]
