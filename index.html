@@ -57,6 +57,14 @@
     .modal { max-width: 800px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
     .modal-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 2rem; border-bottom: 1px solid var(--border); }
     .modal-head h2 { font-size: 1.8rem; }
+
+    /* Cut Diagram */
+    .cut-diagram { margin-top: 0.5rem; }
+    .cut-sheet { margin-bottom: 1.5rem; }
+    .cut-sheet-label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.4rem; font-weight: 600; }
+    .cut-sheet svg { width: 100%; max-width: 480px; border-radius: 8px; }
+    .cut-waste { font-size: 0.8rem; color: var(--text-dim); margin-top: 1rem; }
+    .cut-waste strong { color: var(--accent); }
     .modal-close { background: none; border: none; color: var(--text-dim); font-size: 1.5rem; cursor: pointer; padding: 0.5rem; }
     .modal-close:hover { color: var(--text); }
     .print-btn { padding: 0.5rem 1rem; border: 1px solid var(--accent); border-radius: 8px; background: transparent; color: var(--accent); cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; }
@@ -205,6 +213,41 @@
   </footer>
 
   <script>
+    function renderCutSheet(sheet, sheetSize) {
+      // Determine sheet dims from size string
+      let sheetW = 96, sheetH = 48;
+      if (sheetSize.includes('2×2')) { sheetW = 24; sheetH = 24; }
+      
+      const svgW = 480, svgH = Math.round(480 * (sheetH / sheetW));
+      const pad = 2;
+      const scaleX = (svgW - pad*2) / sheetW;
+      const scaleY = (svgH - pad*2) / sheetH;
+      
+      let rects = '';
+      for (const c of sheet.cuts) {
+        const rx = pad + c.x * scaleX;
+        const ry = pad + c.y * scaleY;
+        const rw = c.w * scaleX - 2;
+        const rh = c.h * scaleY - 2;
+        const fontSize = Math.min(rh / 3, 13);
+        const lines = c.label.split('\n');
+        const textY = ry + rh/2 - (lines.length - 1) * fontSize * 0.6;
+        rects += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="4" fill="${c.color}22" stroke="${c.color}" stroke-width="1.5"/>`;
+        lines.forEach((line, i) => {
+          rects += `<text x="${rx + rw/2}" y="${textY + i * fontSize * 1.2}" text-anchor="middle" fill="${c.color}" font-size="${fontSize}" font-weight="600">${line}</text>`;
+        });
+        // Dimension labels
+        const dimFontSize = Math.min(fontSize * 0.7, 9);
+        rects += `<text x="${rx + rw/2}" y="${ry + rh - dimFontSize*0.5}" text-anchor="middle" fill="#64748b" font-size="${dimFontSize}">${c.w}" × ${c.h}"</text>`;
+      }
+      
+      return `<svg viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${svgW}" height="${svgH}" fill="#0d1117" rx="8"/>
+        <rect x="${pad}" y="${pad}" width="${svgW-pad*2}" height="${svgH-pad*2}" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="4" rx="4"/>
+        ${rects}
+      </svg>`;
+    }
+
     let ramps = [];
     let activeFilter = 'all';
 
