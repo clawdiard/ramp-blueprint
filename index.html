@@ -306,7 +306,7 @@
           <div class="meta">
             <span>💰 $${r.estimatedCost.min}–$${r.estimatedCost.max}</span>
             <span>⏱ ${r.buildTime}</span>
-            <span>📏 ${dimLabel(r.height)}h × ${dimLabel(r.width)}w</span>
+            <span>📏 ${dimLabel(r.height)} h × ${dimLabel(r.width)} w</span>
           </div>
         </div>
       `).join('');
@@ -389,7 +389,7 @@
           <!-- Labels -->
           <text x="${W/2}" y="${H-pad-125}" text-anchor="middle" fill="#64748b" font-size="11">Flat Bottom</text>
           <text x="${pad+10}" y="${H-pad-85}" text-anchor="middle" fill="#3b82f6" font-size="9">Coping</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${r.height}"H × ${r.width}"W × ${r.length}"L</text>
+          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
         </svg>`;
       } else if (r.type === 'quarter-pipe') {
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -400,7 +400,7 @@
           <line x1="${W/2-100}" y1="${H-pad-120}" x2="${W/2-100}" y2="${H-pad}" stroke="#22c55e" stroke-width="1.5"/>
           <circle cx="${W/2-60}" cy="${H-pad-120}" r="4" fill="#3b82f6"/>
           <text x="${W/2-70}" y="${H-pad-125}" fill="#3b82f6" font-size="9">Coping</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${r.height}"H × ${r.width}"W × ${r.length}"L</text>
+          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
         </svg>`;
       } else if (r.type === 'kicker') {
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -408,7 +408,7 @@
           <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
           <path d="M ${W/2-80} ${H-pad} Q ${W/2-80} ${H-pad-80} ${W/2+20} ${H-pad-90}" fill="none" stroke="#f59e0b" stroke-width="2"/>
           <line x1="${W/2-80}" y1="${H-pad}" x2="${W/2+20}" y2="${H-pad}" stroke="#f59e0b" stroke-width="1"/>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${r.height}"H × ${r.width}"W × ${r.length}"L</text>
+          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
         </svg>`;
       } else if (r.type === 'box') {
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -417,7 +417,7 @@
           <rect x="${W/2-120}" y="${H-pad-60}" width="240" height="60" fill="none" stroke="#ef4444" stroke-width="2" rx="2"/>
           <line x1="${W/2-120}" y1="${H-pad-60}" x2="${W/2+120}" y2="${H-pad-60}" stroke="#3b82f6" stroke-width="3"/>
           <text x="${W/2}" y="${H-pad-65}" text-anchor="middle" fill="#3b82f6" font-size="9">Steel Edge (Coping)</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${r.height}"H × ${r.width}"W × ${r.length}"L</text>
+          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
         </svg>`;
       } else {
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -427,7 +427,7 @@
           <line x1="${W/2-80}" y1="${H-pad-50}" x2="${W/2-80}" y2="${H-pad}" stroke="#a855f7" stroke-width="2"/>
           <line x1="${W/2+80}" y1="${H-pad-50}" x2="${W/2+80}" y2="${H-pad}" stroke="#a855f7" stroke-width="2"/>
           <text x="${W/2}" y="${H-pad-55}" text-anchor="middle" fill="#a855f7" font-size="9">Rail</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${r.height}"H × ${r.width}"W × ${r.length}"L</text>
+          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
         </svg>`;
       }
     }
