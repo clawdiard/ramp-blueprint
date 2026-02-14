@@ -107,49 +107,49 @@
     const builds = [
       {
         id: 1, title: "Backyard 3ft Mini Ramp", builder: "SK8R_Mike", type: "mini-ramp",
-        emoji: "🛹", img: "https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?w=600&h=450&fit=crop", location: "Portland, OR", date: "2026-01",
+        emoji: "🛹", img: "", location: "Portland, OR", date: "2026-01",
         desc: "Built using the 3ft mini ramp plan. Added extra bracing for the Pacific NW rain. Masonite surface holds up great!",
         cost: "$380", time: "2 weekends", rating: 5
       },
       {
         id: 2, title: "Garage Quarter Pipe", builder: "wheels_n_deals", type: "quarter-pipe",
-        emoji: "🏠", img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=450&fit=crop", location: "Austin, TX", date: "2026-01",
+        emoji: "🏠", img: "", location: "Austin, TX", date: "2026-01",
         desc: "Fits perfectly against the garage wall. 3ft quarter pipe — kids love it. Used leftover lumber from a deck project.",
         cost: "$120", time: "1 day", rating: 5
       },
       {
         id: 3, title: "Driveway Kicker Ramp", builder: "OllieQueen", type: "kicker",
-        emoji: "🚀", img: "https://images.unsplash.com/photo-1547447134-cd3f5c716030?w=600&h=450&fit=crop", location: "Brooklyn, NY", date: "2026-02",
+        emoji: "🚀", img: "", location: "Brooklyn, NY", date: "2026-02",
         desc: "Compact kicker for the driveway. Great pop for ollies and kickflips. Portable enough to move to the park.",
         cost: "$45", time: "3 hours", rating: 4
       },
       {
         id: 4, title: "Park-Style Grind Box", builder: "GrindKing_303", type: "box",
-        emoji: "⬛", img: "https://images.unsplash.com/photo-1520045892732-304bc3ac5d8e?w=600&h=450&fit=crop", location: "Denver, CO", date: "2026-02",
+        emoji: "⬛", img: "", location: "Denver, CO", date: "2026-02",
         desc: "Steel-edged grind box, super sturdy. The coping angle from the blueprint was spot on. Waxed and ready to shred.",
         cost: "$95", time: "5 hours", rating: 5
       },
       {
         id: 5, title: "Backyard Flat Rail", builder: "rail_rider", type: "rail",
-        emoji: "🔩", img: "https://images.unsplash.com/photo-1621544402532-78c290378588?w=600&h=450&fit=crop", location: "San Diego, CA", date: "2026-01",
+        emoji: "🔩", img: "", location: "San Diego, CA", date: "2026-01",
         desc: "Welded round rail, 6ft long. Added adjustable height legs so beginners can start low. Powder coated for durability.",
         cost: "$70", time: "4 hours", rating: 5
       },
       {
         id: 6, title: "4ft Mini Ramp Beast", builder: "VertDog", type: "mini-ramp",
-        emoji: "🏗️", img: "https://images.unsplash.com/photo-1590502593747-42a996133562?w=600&h=450&fit=crop", location: "Nashville, TN", date: "2026-02",
+        emoji: "🏗️", img: "", location: "Nashville, TN", date: "2026-02",
         desc: "Full 4ft mini with extended deck. This thing is massive — took the whole crew to build but totally worth it. Steel coping grinds like butter.",
         cost: "$650", time: "3 weekends", rating: 5
       },
       {
         id: 7, title: "Rooftop Quarter", builder: "SkySk8", type: "quarter-pipe",
-        emoji: "🌆", img: "https://images.unsplash.com/photo-1583118443607-01011ade3e7d?w=600&h=450&fit=crop", location: "Chicago, IL", date: "2025-12",
+        emoji: "🌆", img: "", location: "Chicago, IL", date: "2025-12",
         desc: "Quarter pipe on my rooftop terrace. Reinforced the base for the concrete surface. Neighbors think I'm crazy but the sunset sessions are unreal.",
         cost: "$200", time: "2 days", rating: 4
       },
       {
         id: 8, title: "Competition Kicker", builder: "CompSk8r", type: "kicker",
-        emoji: "🏆", img: "https://images.unsplash.com/photo-1571188654248-7a89213915f7?w=600&h=450&fit=crop", location: "Phoenix, AZ", date: "2026-01",
+        emoji: "🏆", img: "", location: "Phoenix, AZ", date: "2026-01",
         desc: "Built for our local comp. Steeper angle than the standard plan — gets insane pop. Plywood lasted through 50+ skaters no problem.",
         cost: "$60", time: "4 hours", rating: 5
       }
@@ -176,7 +176,7 @@
       emptyEl.style.display = 'none';
       galleryEl.innerHTML = filtered.map(b => `
         <div class="build-card" data-id="${b.id}">
-          <img class="build-img" src="${b.img}" alt="${b.title} by ${b.builder}" loading="lazy" onerror="this.outerHTML='<div class=\\'build-img\\' style=\\'display:flex;align-items:center;justify-content:center;font-size:4rem;background:var(--surface-2)\\'>${b.emoji}</div>'">
+          ${b.img ? `<img class="build-img" src="${b.img}" alt="${b.title} by ${b.builder}" loading="lazy" onerror="this.outerHTML='<div class=\\'build-img\\' style=\\'display:flex;align-items:center;justify-content:center;font-size:4rem;background:var(--surface-2)\\'>${b.emoji}</div>'">` : `<div class="build-img" style="display:flex;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg, var(--surface-2), ${b.type==='mini-ramp'?'#1e3a5f':b.type==='quarter-pipe'?'#1a3d2e':b.type==='kicker'?'#3d2e0a':b.type==='box'?'#3d1515':b.type==='rail'?'#2d1a4a':'var(--surface-2)'})">${b.emoji}</div>`}
           <div class="build-info">
             <h3>${b.title}</h3>
             <div class="build-meta">
@@ -197,7 +197,7 @@
         card.addEventListener('click', () => {
           const b = builds.find(x => x.id === +card.dataset.id);
           if (!b) return;
-          document.getElementById('lbContent').innerHTML = `<img src="${b.img}" alt="${b.title}" style="max-width:90vw;max-height:80vh;border-radius:12px" onerror="this.outerHTML='<div class=\\'placeholder-emoji\\'>${b.emoji}</div>'">`;
+          document.getElementById('lbContent').innerHTML = b.img ? `<img src="${b.img}" alt="${b.title}" style="max-width:90vw;max-height:80vh;border-radius:12px" onerror="this.outerHTML='<div class=\\'placeholder-emoji\\'>${b.emoji}</div>'">` : `<div style="font-size:8rem">${b.emoji}</div>`;
           document.getElementById('lbCaption').textContent = `${b.title} — by ${b.builder}, ${b.location}`;
           document.getElementById('lightbox').classList.add('active');
           document.body.style.overflow = 'hidden';
