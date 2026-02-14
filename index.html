@@ -364,70 +364,424 @@
     }
 
     function generateBlueprint(r) {
-      const W = 500, H = 250;
-      const pad = 30;
+      const W = 560, H = 320;
+      const pad = 45;
+      const ground = H - pad;
+      const col = {struct:'#f59e0b',dim:'#38bdf8',coping:'#3b82f6',frame:'#475569',label:'#94a3b8',bg:'#0d1117',grid:'#1e293b',accent:'#22d3ee',support:'#64748b'};
+
+      // Helper: dimension line with arrows
+      function dimLine(x1,y1,x2,y2,label,side='right',offset=0) {
+        const vertical = x1===x2;
+        const mx=(x1+x2)/2, my=(y1+y2)/2;
+        let tx,ty,anchor='middle';
+        if(vertical){tx=x1+(side==='right'?12:-12);ty=my;anchor=side==='right'?'start':'end';}
+        else{tx=mx;ty=y1+(side==='top'?-8:12);}
+        const arrSz=3;
+        let arrows='';
+        if(vertical){
+          arrows=`<polygon points="${x1-arrSz},${y1+arrSz} ${x1+arrSz},${y1+arrSz} ${x1},${y1}" fill="${col.dim}"/>
+                   <polygon points="${x2-arrSz},${y2-arrSz} ${x2+arrSz},${y2-arrSz} ${x2},${y2}" fill="${col.dim}"/>`;
+        } else {
+          arrows=`<polygon points="${x1+arrSz},${y1-arrSz} ${x1+arrSz},${y1+arrSz} ${x1},${y1}" fill="${col.dim}"/>
+                   <polygon points="${x2-arrSz},${y2-arrSz} ${x2-arrSz},${y2+arrSz} ${x2},${y2}" fill="${col.dim}"/>`;
+        }
+        return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col.dim}" stroke-width="0.75" stroke-dasharray="2"/>
+                ${arrows}
+                <text x="${tx}" y="${ty}" text-anchor="${anchor}" fill="${col.dim}" font-size="9" font-weight="600">${label}</text>`;
+      }
+
+      // Helper: framing studs (vertical lines for structure)
+      function studs(x1,x2,yTop,yBot,count){
+        let s='';const step=(x2-x1)/(count+1);
+        for(let i=1;i<=count;i++){const x=x1+step*i;
+          s+=`<line x1="${x}" y1="${yTop}" x2="${x}" y2="${yBot}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="3,3"/>`;}
+        return s;
+      }
+
       if (r.type === 'mini-ramp') {
+        // Mini Ramp: full cross-section
+        const rH = 160; // ramp visual height
+        const deckW = 30; // deck/platform width
+        const transW = 80; // transition curve area
+        const flatW = W - 2*pad - 2*deckW - 2*transW;
+        const topY = ground - rH;
+        const copY = topY;
+        const lDeck = pad; const lCop = pad + deckW;
+        const lTransEnd = lCop + transW;
+        const rTransStart = W - pad - deckW - transW;
+        const rCop = W - pad - deckW; const rDeck = W - pad;
+
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${W}" height="${H}" fill="#0d1117"/>
-          <!-- Ground -->
-          <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
-          <!-- Left transition -->
-          <path d="M ${pad+20} ${H-pad} L ${pad+20} ${H-pad-80} Q ${pad+20} ${H-pad-140} ${pad+80} ${H-pad-140} L ${pad+140} ${H-pad-140}" fill="none" stroke="#f59e0b" stroke-width="2"/>
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="${col.grid}" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="${W}" height="${H}" fill="${col.bg}"/>
+          <rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="url(#grid)" opacity="0.5"/>
+
+          <!-- Ground line -->
+          <line x1="${pad-10}" y1="${ground}" x2="${W-pad+10}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>
+          <text x="${W-pad+12}" y="${ground+4}" fill="${col.support}" font-size="8">GROUND</text>
+
+          <!-- Left deck/platform -->
+          <rect x="${lDeck}" y="${copY}" width="${deckW}" height="${rH}" fill="${col.struct}11" stroke="${col.struct}" stroke-width="1.5"/>
+          <line x1="${lDeck}" y1="${copY}" x2="${lCop}" y2="${copY}" stroke="${col.struct}" stroke-width="2.5"/>
+          ${studs(lDeck, lCop, copY, ground, 1)}
+          <text x="${lDeck+deckW/2}" y="${copY+rH/2}" text-anchor="middle" fill="${col.label}" font-size="7" transform="rotate(-90,${lDeck+deckW/2},${copY+rH/2})">DECK</text>
+
+          <!-- Left transition curve -->
+          <path d="M ${lCop} ${copY} Q ${lCop} ${ground-10} ${lTransEnd} ${ground}" fill="none" stroke="${col.struct}" stroke-width="2"/>
+          <!-- Transition framing ribs -->
+          ${[0.25,0.5,0.75].map(t => {
+            const cx = lCop + (lTransEnd-lCop)*t;
+            const cy = copY + (ground-copY)*t*t;
+            return `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${ground}" stroke="${col.frame}" stroke-width="0.8" stroke-dasharray="3,2"/>`;
+          }).join('')}
+          <!-- Masonite surface indicator -->
+          <path d="M ${lCop} ${copY+2} Q ${lCop+2} ${ground-8} ${lTransEnd} ${ground}" fill="none" stroke="${col.accent}" stroke-width="0.8" stroke-dasharray="1,2"/>
+
           <!-- Flat bottom -->
-          <line x1="${pad+140}" y1="${H-pad-140}" x2="${W-pad-140}" y2="${H-pad-140}" stroke="#f59e0b" stroke-width="2"/>
-          <!-- Right transition -->
-          <path d="M ${W-pad-140} ${H-pad-140} L ${W-pad-80} ${H-pad-140} Q ${W-pad-20} ${H-pad-140} ${W-pad-20} ${H-pad-80} L ${W-pad-20} ${H-pad}" fill="none" stroke="#f59e0b" stroke-width="2"/>
-          <!-- Platform left -->
-          <line x1="${pad}" y1="${H-pad-80}" x2="${pad+20}" y2="${H-pad-80}" stroke="#f59e0b" stroke-width="2"/>
-          <line x1="${pad}" y1="${H-pad-80}" x2="${pad}" y2="${H-pad}" stroke="#f59e0b" stroke-width="1.5"/>
-          <!-- Platform right -->
-          <line x1="${W-pad-20}" y1="${H-pad-80}" x2="${W-pad}" y2="${H-pad-80}" stroke="#f59e0b" stroke-width="2"/>
-          <line x1="${W-pad}" y1="${H-pad-80}" x2="${W-pad}" y2="${H-pad}" stroke="#f59e0b" stroke-width="1.5"/>
-          <!-- Coping dots -->
-          <circle cx="${pad+20}" cy="${H-pad-80}" r="4" fill="#3b82f6"/>
-          <circle cx="${W-pad-20}" cy="${H-pad-80}" r="4" fill="#3b82f6"/>
-          <!-- Labels -->
-          <text x="${W/2}" y="${H-pad-125}" text-anchor="middle" fill="#64748b" font-size="11">Flat Bottom</text>
-          <text x="${pad+10}" y="${H-pad-85}" text-anchor="middle" fill="#3b82f6" font-size="9">Coping</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
+          <line x1="${lTransEnd}" y1="${ground}" x2="${rTransStart}" y2="${ground}" stroke="${col.struct}" stroke-width="2.5"/>
+          <!-- Flat bottom cross-bracing -->
+          <line x1="${lTransEnd+10}" y1="${ground-3}" x2="${rTransStart-10}" y2="${ground-3}" stroke="${col.accent}" stroke-width="1" stroke-dasharray="4,3"/>
+          ${studs(lTransEnd, rTransStart, ground-15, ground, 4)}
+
+          <!-- Right transition curve -->
+          <path d="M ${rTransStart} ${ground} Q ${rCop} ${ground-10} ${rCop} ${copY}" fill="none" stroke="${col.struct}" stroke-width="2"/>
+          ${[0.25,0.5,0.75].map(t => {
+            const cx = rTransStart + (rCop-rTransStart)*t;
+            const cy = ground - (ground-copY)*t*t;
+            return `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${ground}" stroke="${col.frame}" stroke-width="0.8" stroke-dasharray="3,2"/>`;
+          }).join('')}
+          <path d="M ${rTransStart} ${ground} Q ${rCop-2} ${ground-8} ${rCop} ${copY+2}" fill="none" stroke="${col.accent}" stroke-width="0.8" stroke-dasharray="1,2"/>
+
+          <!-- Right deck/platform -->
+          <rect x="${rCop}" y="${copY}" width="${deckW}" height="${rH}" fill="${col.struct}11" stroke="${col.struct}" stroke-width="1.5"/>
+          <line x1="${rCop}" y1="${copY}" x2="${rDeck}" y2="${copY}" stroke="${col.struct}" stroke-width="2.5"/>
+          ${studs(rCop, rDeck, copY, ground, 1)}
+          <text x="${rCop+deckW/2}" y="${copY+rH/2}" text-anchor="middle" fill="${col.label}" font-size="7" transform="rotate(90,${rCop+deckW/2},${copY+rH/2})">DECK</text>
+
+          <!-- Coping pipes -->
+          <circle cx="${lCop}" cy="${copY}" r="5" fill="${col.coping}" opacity="0.9"/>
+          <circle cx="${lCop}" cy="${copY}" r="2.5" fill="${col.bg}"/>
+          <circle cx="${rCop}" cy="${copY}" r="5" fill="${col.coping}" opacity="0.9"/>
+          <circle cx="${rCop}" cy="${copY}" r="2.5" fill="${col.bg}"/>
+
+          <!-- Coping labels -->
+          <line x1="${lCop}" y1="${copY-6}" x2="${lCop-15}" y2="${copY-22}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${lCop-17}" y="${copY-24}" text-anchor="end" fill="${col.coping}" font-size="8" font-weight="600">2" Steel Coping</text>
+          <line x1="${rCop}" y1="${copY-6}" x2="${rCop+15}" y2="${copY-22}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${rCop+17}" y="${copY-24}" fill="${col.coping}" font-size="8" font-weight="600">2" Steel Coping</text>
+
+          <!-- Surface label -->
+          <line x1="${lCop+transW*0.4}" y1="${copY + (ground-copY)*0.2}" x2="${lCop+transW*0.4+30}" y2="${copY + (ground-copY)*0.2 - 18}" stroke="${col.accent}" stroke-width="0.5"/>
+          <text x="${lCop+transW*0.4+32}" y="${copY + (ground-copY)*0.2 - 20}" fill="${col.accent}" font-size="7">Masonite/Skatelite</text>
+
+          <!-- Flat Bottom label -->
+          <text x="${W/2}" y="${ground-18}" text-anchor="middle" fill="${col.label}" font-size="9" font-weight="600">FLAT BOTTOM</text>
+
+          <!-- Transition label -->
+          <text x="${lCop + transW/2}" y="${copY + rH*0.55}" text-anchor="middle" fill="${col.label}" font-size="7" transform="rotate(-55,${lCop + transW/2},${copY + rH*0.55})">TRANSITION</text>
+          <text x="${rCop - transW/2}" y="${copY + rH*0.55}" text-anchor="middle" fill="${col.label}" font-size="7" transform="rotate(55,${rCop - transW/2},${copY + rH*0.55})">TRANSITION</text>
+
+          <!-- Dimension: Height (left side) -->
+          ${dimLine(lDeck-14, copY, lDeck-14, ground, dimLabel(r.height), 'left')}
+          <!-- Dimension: Flat Bottom (bottom) -->
+          ${dimLine(lTransEnd, ground+16, rTransStart, ground+16, r.flatBottom ? dimLabel(r.flatBottom) : '', 'top')}
+          <!-- Dimension: Total Length (bottom) -->
+          ${dimLine(pad, ground+30, W-pad, ground+30, dimLabel(r.length) + ' total', 'top')}
+          <!-- Dimension: Transition Radius -->
+          ${r.transitionRadius ? `<text x="${lCop+transW+5}" y="${copY+12}" fill="${col.dim}" font-size="7">R=${dimLabel(r.transitionRadius)}</text>` : ''}
+          <!-- Dimension: Width label -->
+          <text x="${W/2}" y="${pad-8}" text-anchor="middle" fill="${col.dim}" font-size="9" font-weight="600">Width: ${dimLabel(r.width)}</text>
+
+          <!-- Scale reference -->
+          <line x1="${W-pad-60}" y1="${pad+5}" x2="${W-pad}" y2="${pad+5}" stroke="${col.dim}" stroke-width="1"/>
+          <text x="${W-pad-30}" y="${pad+16}" text-anchor="middle" fill="${col.dim}" font-size="7">Scale Ref</text>
+
+          <!-- Title -->
+          <text x="${pad}" y="${pad-8}" fill="${col.label}" font-size="10" font-weight="700">CROSS-SECTION — ${r.name.toUpperCase()}</text>
         </svg>`;
       } else if (r.type === 'quarter-pipe') {
+        // Quarter Pipe: full cross-section
+        const qH = 165;
+        const topQ = ground - qH;
+        const backX = pad + 40; // back wall
+        const copX = backX + 20; // coping position
+        const transEnd = W - pad - 80; // where transition meets ground
+
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${W}" height="${H}" fill="#0d1117"/>
-          <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
-          <path d="M ${W/2-60} ${H-pad} L ${W/2-60} ${H-pad-120} Q ${W/2-60} ${H-pad-160} ${W/2+20} ${H-pad-160} L ${W/2+100} ${H-pad-160}" fill="none" stroke="#22c55e" stroke-width="2"/>
-          <line x1="${W/2-100}" y1="${H-pad-120}" x2="${W/2-60}" y2="${H-pad-120}" stroke="#22c55e" stroke-width="2"/>
-          <line x1="${W/2-100}" y1="${H-pad-120}" x2="${W/2-100}" y2="${H-pad}" stroke="#22c55e" stroke-width="1.5"/>
-          <circle cx="${W/2-60}" cy="${H-pad-120}" r="4" fill="#3b82f6"/>
-          <text x="${W/2-70}" y="${H-pad-125}" fill="#3b82f6" font-size="9">Coping</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
+          <defs>
+            <pattern id="gridq" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="${col.grid}" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="${W}" height="${H}" fill="${col.bg}"/>
+          <rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="url(#gridq)" opacity="0.5"/>
+
+          <!-- Ground -->
+          <line x1="${pad-10}" y1="${ground}" x2="${W-pad+10}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>
+          <text x="${W-pad+12}" y="${ground+4}" fill="${col.support}" font-size="8">GROUND</text>
+
+          <!-- Back wall -->
+          <rect x="${pad}" y="${topQ}" width="${backX-pad}" height="${qH}" fill="#22c55e11" stroke="#22c55e" stroke-width="1.5"/>
+          ${studs(pad, backX, topQ, ground, 2)}
+          <text x="${(pad+backX)/2}" y="${topQ+qH/2}" text-anchor="middle" fill="${col.label}" font-size="7" transform="rotate(-90,${(pad+backX)/2},${topQ+qH/2})">BACK WALL</text>
+
+          <!-- Deck/platform -->
+          <line x1="${pad}" y1="${topQ}" x2="${copX}" y2="${topQ}" stroke="#22c55e" stroke-width="2.5"/>
+          <text x="${(pad+copX)/2}" y="${topQ-5}" text-anchor="middle" fill="${col.label}" font-size="7">DECK</text>
+
+          <!-- Coping -->
+          <circle cx="${copX}" cy="${topQ}" r="5" fill="${col.coping}" opacity="0.9"/>
+          <circle cx="${copX}" cy="${topQ}" r="2.5" fill="${col.bg}"/>
+          <line x1="${copX+6}" y1="${topQ}" x2="${copX+35}" y2="${topQ-18}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${copX+37}" y="${topQ-20}" fill="${col.coping}" font-size="8" font-weight="600">2" Steel Coping</text>
+
+          <!-- Transition curve -->
+          <path d="M ${copX} ${topQ} Q ${copX} ${ground-10} ${transEnd} ${ground}" fill="none" stroke="#22c55e" stroke-width="2"/>
+          <!-- Transition framing ribs -->
+          ${[0.2,0.4,0.6,0.8].map(t => {
+            const cx = copX + (transEnd-copX)*t;
+            const cy = topQ + (ground-topQ)*t*t;
+            return `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${ground}" stroke="${col.frame}" stroke-width="0.8" stroke-dasharray="3,2"/>`;
+          }).join('')}
+          <!-- Surface layer -->
+          <path d="M ${copX} ${topQ+2} Q ${copX+2} ${ground-8} ${transEnd} ${ground}" fill="none" stroke="${col.accent}" stroke-width="0.8" stroke-dasharray="1,2"/>
+
+          <!-- Approach/flat -->
+          <line x1="${transEnd}" y1="${ground}" x2="${W-pad}" y2="${ground}" stroke="#22c55e" stroke-width="2"/>
+          <text x="${(transEnd+W-pad)/2}" y="${ground-8}" text-anchor="middle" fill="${col.label}" font-size="8">APPROACH</text>
+
+          <!-- Transition label -->
+          <text x="${copX + (transEnd-copX)*0.4}" y="${topQ + qH*0.45}" text-anchor="middle" fill="${col.label}" font-size="8" transform="rotate(-50,${copX + (transEnd-copX)*0.4},${topQ + qH*0.45})">TRANSITION</text>
+
+          <!-- Surface label -->
+          <line x1="${copX+(transEnd-copX)*0.3}" y1="${topQ+(ground-topQ)*0.12}" x2="${copX+(transEnd-copX)*0.3+40}" y2="${topQ+(ground-topQ)*0.12-15}" stroke="${col.accent}" stroke-width="0.5"/>
+          <text x="${copX+(transEnd-copX)*0.3+42}" y="${topQ+(ground-topQ)*0.12-17}" fill="${col.accent}" font-size="7">3/4" Ply + Masonite</text>
+
+          <!-- Dimension: Height -->
+          ${dimLine(pad-14, topQ, pad-14, ground, dimLabel(r.height), 'left')}
+          <!-- Dimension: Length -->
+          ${dimLine(pad, ground+20, W-pad, ground+20, dimLabel(r.length), 'top')}
+          <!-- Dimension: Radius -->
+          ${r.transitionRadius ? `<text x="${copX+(transEnd-copX)*0.65}" y="${topQ+qH*0.7}" fill="${col.dim}" font-size="8">R=${dimLabel(r.transitionRadius)}</text>` : ''}
+          <!-- Dimension: Width -->
+          <text x="${W/2}" y="${pad-8}" text-anchor="middle" fill="${col.dim}" font-size="9" font-weight="600">Width: ${dimLabel(r.width)}</text>
+
+          <!-- Title -->
+          <text x="${pad}" y="${pad-8}" fill="${col.label}" font-size="10" font-weight="700">CROSS-SECTION — ${r.name.toUpperCase()}</text>
         </svg>`;
       } else if (r.type === 'kicker') {
+        // Kicker: full cross-section with wedge shape
+        const kH = 120;
+        const kTopY = ground - kH;
+        const kLeft = pad + 60;
+        const kRight = W - pad - 60;
+        const kPeakX = kLeft + 60; // peak of the lip
+
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${W}" height="${H}" fill="#0d1117"/>
-          <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
-          <path d="M ${W/2-80} ${H-pad} Q ${W/2-80} ${H-pad-80} ${W/2+20} ${H-pad-90}" fill="none" stroke="#f59e0b" stroke-width="2"/>
-          <line x1="${W/2-80}" y1="${H-pad}" x2="${W/2+20}" y2="${H-pad}" stroke="#f59e0b" stroke-width="1"/>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
+          <defs>
+            <pattern id="gridk" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="${col.grid}" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="${W}" height="${H}" fill="${col.bg}"/>
+          <rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="url(#gridk)" opacity="0.5"/>
+
+          <!-- Ground -->
+          <line x1="${pad-10}" y1="${ground}" x2="${W-pad+10}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>
+
+          <!-- Kicker body - wedge/ramp shape -->
+          <path d="M ${kLeft} ${ground} L ${kLeft} ${kTopY+30} Q ${kLeft} ${kTopY} ${kPeakX} ${kTopY} L ${kRight} ${ground} Z" fill="${col.struct}08" stroke="${col.struct}" stroke-width="2"/>
+
+          <!-- Curved lip surface -->
+          <path d="M ${kLeft} ${ground} L ${kLeft} ${kTopY+30} Q ${kLeft} ${kTopY} ${kPeakX} ${kTopY}" fill="none" stroke="${col.accent}" stroke-width="2.5"/>
+
+          <!-- Bottom/approach surface -->
+          <line x1="${kPeakX}" y1="${kTopY}" x2="${kRight}" y2="${ground}" stroke="${col.struct}" stroke-width="2"/>
+
+          <!-- Internal framing -->
+          ${[0.25, 0.5, 0.75].map(t => {
+            const fx = kLeft + (kRight-kLeft)*t;
+            const fTopY = kTopY + (ground-kTopY)*(t > 0.3 ? (t-0.15)*1.3 : 0.1);
+            return `<line x1="${fx}" y1="${Math.min(fTopY, ground)}" x2="${fx}" y2="${ground}" stroke="${col.frame}" stroke-width="0.8" stroke-dasharray="3,2"/>`;
+          }).join('')}
+
+          <!-- Cross brace -->
+          <line x1="${kLeft+20}" y1="${ground-20}" x2="${kRight-20}" y2="${ground-20}" stroke="${col.frame}" stroke-width="0.7" stroke-dasharray="4,3"/>
+
+          <!-- Lip/launch point -->
+          <circle cx="${kPeakX}" cy="${kTopY}" r="4" fill="${col.coping}" opacity="0.9"/>
+          <line x1="${kPeakX}" y1="${kTopY-5}" x2="${kPeakX-20}" y2="${kTopY-25}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${kPeakX-22}" y="${kTopY-27}" text-anchor="end" fill="${col.coping}" font-size="8" font-weight="600">Launch Lip</text>
+
+          <!-- Surface label -->
+          <text x="${(kPeakX+kRight)/2-10}" y="${kTopY + (ground-kTopY)*0.4}" text-anchor="middle" fill="${col.label}" font-size="8" transform="rotate(30,${(kPeakX+kRight)/2-10},${kTopY + (ground-kTopY)*0.4})">RAMP SURFACE</text>
+
+          <!-- Plywood label -->
+          <line x1="${kLeft+15}" y1="${kTopY+40}" x2="${kLeft+50}" y2="${kTopY+20}" stroke="${col.accent}" stroke-width="0.5"/>
+          <text x="${kLeft+52}" y="${kTopY+18}" fill="${col.accent}" font-size="7">3/4" Plywood</text>
+
+          <!-- Framing label -->
+          <text x="${W/2}" y="${ground-8}" text-anchor="middle" fill="${col.label}" font-size="7">2×4 FRAMING</text>
+
+          <!-- Approach arrows -->
+          <line x1="${kLeft-40}" y1="${ground-5}" x2="${kLeft-10}" y2="${ground-5}" stroke="${col.dim}" stroke-width="1" marker-end="url(#arr)"/>
+          <text x="${kLeft-50}" y="${ground-2}" text-anchor="end" fill="${col.dim}" font-size="8">APPROACH →</text>
+
+          <!-- Dimension: Height -->
+          ${dimLine(kLeft-18, kTopY, kLeft-18, ground, dimLabel(r.height), 'left')}
+          <!-- Dimension: Length -->
+          ${dimLine(kLeft, ground+20, kRight, ground+20, dimLabel(r.length), 'top')}
+          <!-- Dimension: Width -->
+          <text x="${W/2}" y="${pad-8}" text-anchor="middle" fill="${col.dim}" font-size="9" font-weight="600">Width: ${dimLabel(r.width)}</text>
+
+          <!-- Angle indicator -->
+          <path d="M ${kRight-30} ${ground} A 30 30 0 0 0 ${kRight-30+30*Math.cos(Math.atan2(ground-(kTopY),(kRight-kPeakX)))} ${ground-30*Math.sin(Math.atan2(ground-(kTopY),(kRight-kPeakX)))}" fill="none" stroke="${col.dim}" stroke-width="0.7"/>
+          <text x="${kRight-15}" y="${ground-15}" fill="${col.dim}" font-size="7">~${Math.round(Math.atan2(r.height, r.length*0.6)*180/Math.PI)}°</text>
+
+          <!-- Title -->
+          <text x="${pad}" y="${pad-8}" fill="${col.label}" font-size="10" font-weight="700">CROSS-SECTION — ${r.name.toUpperCase()}</text>
         </svg>`;
       } else if (r.type === 'box') {
+        // Grind Box: full cross-section with framing
+        const bH = 80;
+        const bTopY = ground - bH;
+        const bLeft = pad + 80;
+        const bRight = W - pad - 80;
+        const bW = bRight - bLeft;
+
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${W}" height="${H}" fill="#0d1117"/>
-          <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
-          <rect x="${W/2-120}" y="${H-pad-60}" width="240" height="60" fill="none" stroke="#ef4444" stroke-width="2" rx="2"/>
-          <line x1="${W/2-120}" y1="${H-pad-60}" x2="${W/2+120}" y2="${H-pad-60}" stroke="#3b82f6" stroke-width="3"/>
-          <text x="${W/2}" y="${H-pad-65}" text-anchor="middle" fill="#3b82f6" font-size="9">Steel Edge (Coping)</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
+          <defs>
+            <pattern id="gridb" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="${col.grid}" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="${W}" height="${H}" fill="${col.bg}"/>
+          <rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="url(#gridb)" opacity="0.5"/>
+
+          <!-- Ground -->
+          <line x1="${pad-10}" y1="${ground}" x2="${W-pad+10}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>
+
+          <!-- Box body -->
+          <rect x="${bLeft}" y="${bTopY}" width="${bW}" height="${bH}" fill="#ef444408" stroke="#ef4444" stroke-width="2" rx="2"/>
+
+          <!-- Top surface (plywood) -->
+          <rect x="${bLeft}" y="${bTopY}" width="${bW}" height="6" fill="#ef444422" stroke="#ef4444" stroke-width="1"/>
+          <text x="${W/2}" y="${bTopY+4}" text-anchor="middle" fill="${col.label}" font-size="6" dominant-baseline="middle">3/4" PLYWOOD TOP</text>
+
+          <!-- Steel coping edges (both sides) -->
+          <line x1="${bLeft}" y1="${bTopY}" x2="${bLeft}" y2="${bTopY-3}" stroke="${col.coping}" stroke-width="4" stroke-linecap="round"/>
+          <line x1="${bRight}" y1="${bTopY}" x2="${bRight}" y2="${bTopY-3}" stroke="${col.coping}" stroke-width="4" stroke-linecap="round"/>
+          <line x1="${bLeft}" y1="${bTopY}" x2="${bRight}" y2="${bTopY}" stroke="${col.coping}" stroke-width="3"/>
+
+          <!-- Steel edge labels -->
+          <line x1="${bLeft}" y1="${bTopY-4}" x2="${bLeft-25}" y2="${bTopY-30}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${bLeft-27}" y="${bTopY-32}" text-anchor="end" fill="${col.coping}" font-size="8" font-weight="600">Steel L-Angle</text>
+          <line x1="${bRight}" y1="${bTopY-4}" x2="${bRight+25}" y2="${bTopY-30}" stroke="${col.coping}" stroke-width="0.7"/>
+          <text x="${bRight+27}" y="${bTopY-32}" fill="${col.coping}" font-size="8" font-weight="600">Steel L-Angle</text>
+
+          <!-- Internal framing - 2x4 studs -->
+          ${[0.2, 0.4, 0.6, 0.8].map(t => {
+            const x = bLeft + bW*t;
+            return `<line x1="${x}" y1="${bTopY+6}" x2="${x}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>`;
+          }).join('')}
+
+          <!-- Cross braces -->
+          <line x1="${bLeft+15}" y1="${bTopY + bH*0.4}" x2="${bRight-15}" y2="${bTopY + bH*0.4}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="${bLeft+15}" y1="${bTopY + bH*0.75}" x2="${bRight-15}" y2="${bTopY + bH*0.75}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="4,3"/>
+
+          <!-- Side walls -->
+          <line x1="${bLeft}" y1="${bTopY}" x2="${bLeft}" y2="${ground}" stroke="#ef4444" stroke-width="2"/>
+          <line x1="${bRight}" y1="${bTopY}" x2="${bRight}" y2="${ground}" stroke="#ef4444" stroke-width="2"/>
+
+          <!-- Framing label -->
+          <text x="${W/2}" y="${bTopY + bH*0.55}" text-anchor="middle" fill="${col.label}" font-size="8">2×4 FRAMING</text>
+
+          <!-- Bottom plate -->
+          <line x1="${bLeft}" y1="${ground}" x2="${bRight}" y2="${ground}" stroke="#ef4444" stroke-width="2.5"/>
+          <text x="${W/2}" y="${ground+12}" text-anchor="middle" fill="${col.label}" font-size="7">BOTTOM PLATE</text>
+
+          <!-- Dimension: Height -->
+          ${dimLine(bLeft-22, bTopY, bLeft-22, ground, dimLabel(r.height), 'left')}
+          <!-- Dimension: Length -->
+          ${dimLine(bLeft, ground+26, bRight, ground+26, dimLabel(r.length), 'top')}
+          <!-- Dimension: Width -->
+          <text x="${W/2}" y="${pad-8}" text-anchor="middle" fill="${col.dim}" font-size="9" font-weight="600">Width: ${dimLabel(r.width)}</text>
+
+          <!-- Title -->
+          <text x="${pad}" y="${pad-8}" fill="${col.label}" font-size="10" font-weight="700">CROSS-SECTION — ${r.name.toUpperCase()}</text>
         </svg>`;
       } else {
+        // Rail: full cross-section with legs, crossbars, footplates
+        const rlH = 90;
+        const rlTopY = ground - rlH;
+        const rlLeft = pad + 80;
+        const rlRight = W - pad - 80;
+        const rlLen = rlRight - rlLeft;
+
         return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-          <rect width="${W}" height="${H}" fill="#0d1117"/>
-          <line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#334155" stroke-width="1" stroke-dasharray="4"/>
-          <line x1="${W/2-100}" y1="${H-pad-50}" x2="${W/2+100}" y2="${H-pad-50}" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>
-          <line x1="${W/2-80}" y1="${H-pad-50}" x2="${W/2-80}" y2="${H-pad}" stroke="#a855f7" stroke-width="2"/>
-          <line x1="${W/2+80}" y1="${H-pad-50}" x2="${W/2+80}" y2="${H-pad}" stroke="#a855f7" stroke-width="2"/>
-          <text x="${W/2}" y="${H-pad-55}" text-anchor="middle" fill="#a855f7" font-size="9">Rail</text>
-          <text x="${W/2}" y="${H-15}" text-anchor="middle" fill="#64748b" font-size="10">${dimLabel(r.height)} H × ${dimLabel(r.width)} W × ${dimLabel(r.length)} L</text>
+          <defs>
+            <pattern id="gridr" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="${col.grid}" stroke-width="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="${W}" height="${H}" fill="${col.bg}"/>
+          <rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="url(#gridr)" opacity="0.5"/>
+
+          <!-- Ground -->
+          <line x1="${pad-10}" y1="${ground}" x2="${W-pad+10}" y2="${ground}" stroke="${col.frame}" stroke-width="1.5"/>
+
+          <!-- Rail pipe -->
+          <line x1="${rlLeft-10}" y1="${rlTopY}" x2="${rlRight+10}" y2="${rlTopY}" stroke="#a855f7" stroke-width="5" stroke-linecap="round"/>
+          <!-- Rail pipe highlight (3D effect) -->
+          <line x1="${rlLeft-8}" y1="${rlTopY-1.5}" x2="${rlRight+8}" y2="${rlTopY-1.5}" stroke="#c084fc" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+          <!-- Rail label -->
+          <line x1="${W/2}" y1="${rlTopY-4}" x2="${W/2}" y2="${rlTopY-25}" stroke="#a855f7" stroke-width="0.7"/>
+          <text x="${W/2}" y="${rlTopY-28}" text-anchor="middle" fill="#a855f7" font-size="9" font-weight="600">Round Steel Rail</text>
+
+          <!-- Legs (4 legs with gussets) -->
+          ${[0, 0.33, 0.66, 1].map(t => {
+            const lx = rlLeft + rlLen*t;
+            return `
+              <line x1="${lx}" y1="${rlTopY+2}" x2="${lx}" y2="${ground}" stroke="#a855f7" stroke-width="2.5"/>
+              <!-- Gusset/brace -->
+              <path d="M ${lx} ${rlTopY+8} L ${lx+12} ${rlTopY+20} L ${lx} ${rlTopY+20} Z" fill="#a855f722" stroke="#a855f7" stroke-width="0.7"/>
+              <path d="M ${lx} ${rlTopY+8} L ${lx-12} ${rlTopY+20} L ${lx} ${rlTopY+20} Z" fill="#a855f722" stroke="#a855f7" stroke-width="0.7"/>
+              <!-- Foot plate -->
+              <rect x="${lx-15}" y="${ground-4}" width="30" height="4" fill="#a855f744" stroke="#a855f7" stroke-width="1" rx="1"/>
+            `;
+          }).join('')}
+
+          <!-- Cross braces between legs -->
+          <line x1="${rlLeft}" y1="${rlTopY + rlH*0.5}" x2="${rlLeft+rlLen*0.33}" y2="${rlTopY + rlH*0.5}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="${rlLeft+rlLen*0.33}" y1="${rlTopY + rlH*0.5}" x2="${rlLeft+rlLen*0.66}" y2="${rlTopY + rlH*0.5}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="${rlLeft+rlLen*0.66}" y1="${rlTopY + rlH*0.5}" x2="${rlRight}" y2="${rlTopY + rlH*0.5}" stroke="${col.frame}" stroke-width="1" stroke-dasharray="4,3"/>
+
+          <!-- Component labels -->
+          <text x="${rlLeft + rlLen*0.16}" y="${rlTopY + rlH*0.35}" text-anchor="middle" fill="${col.label}" font-size="7">LEG</text>
+          <text x="${rlLeft + rlLen*0.5}" y="${rlTopY + rlH*0.55 + 10}" text-anchor="middle" fill="${col.label}" font-size="7">CROSS BRACE</text>
+
+          <!-- Foot plate label -->
+          <line x1="${rlRight+12}" y1="${ground-2}" x2="${rlRight+35}" y2="${ground-20}" stroke="#a855f7" stroke-width="0.5"/>
+          <text x="${rlRight+37}" y="${ground-22}" fill="#a855f7" font-size="7">Foot Plate</text>
+
+          <!-- Gusset label -->
+          <line x1="${rlLeft+14}" y1="${rlTopY+14}" x2="${rlLeft+40}" y2="${rlTopY+8}" stroke="${col.label}" stroke-width="0.5"/>
+          <text x="${rlLeft+42}" y="${rlTopY+11}" fill="${col.label}" font-size="7">Gusset</text>
+
+          <!-- Dimension: Height -->
+          ${dimLine(rlLeft-30, rlTopY, rlLeft-30, ground, dimLabel(r.height), 'left')}
+          <!-- Dimension: Length -->
+          ${dimLine(rlLeft, ground+22, rlRight, ground+22, dimLabel(r.length), 'top')}
+          <!-- Dimension: Width -->
+          <text x="${W/2}" y="${pad-8}" text-anchor="middle" fill="${col.dim}" font-size="9" font-weight="600">Width: ${dimLabel(r.width)}</text>
+
+          <!-- Title -->
+          <text x="${pad}" y="${pad-8}" fill="${col.label}" font-size="10" font-weight="700">CROSS-SECTION — ${r.name.toUpperCase()}</text>
         </svg>`;
       }
     }
